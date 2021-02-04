@@ -15,6 +15,8 @@ suspend fun main() = Korge(width = 640, height = 480, bgcolor = Colors["#2b2b2b"
 	var idleRightSpriteMap = resourcesVfs["Idle (78x58).png"].readBitmap()
 	var runLeftSpriteMap = resourcesVfs["Run (78x58).png"].readBitmap().flipX()
 	var runRightSpriteMap = resourcesVfs["Run (78x58).png"].readBitmap()
+	var attackLeftSpriteMap = resourcesVfs["Attack (78x58).png"].readBitmap().flipX()
+	var attackRightSpriteMap = resourcesVfs["Attack (78x58).png"].readBitmap()
 	val idleLeftAnimation = SpriteAnimation(
 		spriteMap = idleLeftSpriteMap,
 		spriteWidth = 78,
@@ -38,6 +40,18 @@ suspend fun main() = Korge(width = 640, height = 480, bgcolor = Colors["#2b2b2b"
 		spriteWidth = 78,
 		spriteHeight = 58,
 		columns = 8
+	)
+	val attackLeftAnimation = SpriteAnimation(
+		spriteMap = attackLeftSpriteMap,
+		spriteWidth = 78,
+		spriteHeight = 58,
+		columns = 3
+	)
+	val attackRightAnimation = SpriteAnimation(
+		spriteMap = attackRightSpriteMap,
+		spriteWidth = 78,
+		spriteHeight = 58,
+		columns = 3
 	)
 	val sprite = sprite() {
 		scale(1)
@@ -63,32 +77,24 @@ suspend fun main() = Korge(width = 640, height = 480, bgcolor = Colors["#2b2b2b"
 				sprite.playAnimationLooped(idleLeftAnimation, spriteDisplayTime = 50.milliseconds)
 			}
 		}
-	})
-	// TILESET
-	val tiledMap = resourcesVfs["sample.tmx"].readTiledMap()
-	fixedSizeContainer(256, 256, clip = true) {
-		position(128, 128)
-		val camera = camera {
-			tiledMapView(tiledMap) {
+		if (input.keys[Key.SPACE]) {
+			if (lookingRight) {
+				sprite.playAnimation(
+					times = 1,
+					attackRightAnimation,
+					spriteDisplayTime = 100.milliseconds,
+					reversed = true
+				)
+			} else {
+				sprite.playAnimation(
+					times = 1,
+					attackLeftAnimation,
+					spriteDisplayTime = 100.milliseconds,
+					reversed = true
+				)
 			}
 		}
-		var dx = 0.0
-		var dy = 0.0
-		addUpdater {
-			//val scale = 1.0 / (it / 16.666666.hrMilliseconds)
-			val scale = if (it == 0.milliseconds) 0.0 else (it / 16.666666.milliseconds)
-			if (views.input.keys[Key.RIGHT]) dx -= 1.0
-			if (views.input.keys[Key.LEFT]) dx += 1.0
-			if (views.input.keys[Key.UP]) dy += 1.0
-			if (views.input.keys[Key.DOWN]) dy -= 1.0
-			dx = dx.clamp(-10.0, +10.0)
-			dy = dy.clamp(-10.0, +10.0)
-			camera.x += dx * scale
-			camera.y += dy * scale
-			dx *= 0.9.pow(scale)
-			dy *= 0.9.pow(scale)
-		}
-	}
+	})
 }
 
 
